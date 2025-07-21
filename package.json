@@ -11,6 +11,7 @@
     "test:watch": "jest --watch --onlyChanged"
   },
   "dependencies": {
+    "axios": "^1.10.0",
     "graphql": "^15.5.1",
     "graphql-compose": "^9.0.8",
     "graphql-helix": "^1.13.0",
