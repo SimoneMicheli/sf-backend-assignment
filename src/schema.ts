@@ -1,23 +1,15 @@
 import { ResolverResolveParams, SchemaComposer } from 'graphql-compose'
-import BlockTC from './Block'
+import TransactionTC from './Transaction'
 
 const schemaComposer = new SchemaComposer()
 
-const TransactionTC = schemaComposer.createObjectTC({
-    name: 'Transaction',
-    fields: {
-        id: 'String!',
-        energy: 'Int!'
-    }
-})
-
 schemaComposer.Query.addFields({
-  hello: {
+  /*hello: {
     type: () => 'String!',
     resolve: () => 'Hi there, good luck with the assignment!',
-  },
+  },*/
 
-  blockById: BlockTC.getResolver('findById')
+  transactionsEnergy: TransactionTC.getResolver("findByBlockId")
 })
 
 export const schema = schemaComposer.buildSchema()
