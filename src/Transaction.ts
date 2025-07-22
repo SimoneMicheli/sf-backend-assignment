@@ -1,6 +1,8 @@
 import { ResolverResolveParams, schemaComposer } from 'graphql-compose'
 import { GraphQLError } from 'graphql'
 import axios, { AxiosError } from 'axios'
+import { Wallet } from './WalletEnergy'
+import { calcTransactionEnergy } from './EnergyUtils'
 
 interface Transaction {
     hash: string,
@@ -28,9 +30,7 @@ async function getTransactionsPerBlock(blockId:string) : Promise<Transaction[]> 
     try{
         const {data} = await axios.get<BlockAPIResponse>(url)
 
-        const transactions : Transaction[] = data.tx.map(
-            (t) => ({hash: t.hash, energy: t.size * 4.56, size: t.size})
-        )
+        const transactions : Transaction[] = data.tx.map(calcTransactionEnergy)
 
         return transactions
     }catch (error){
@@ -54,4 +54,4 @@ TransactionTC.addResolver({
 })
 
 export default TransactionTC
-export {getTransactionsPerBlock, Transaction}
+export {getTransactionsPerBlock, Transaction,TransactionAPIRespnse}

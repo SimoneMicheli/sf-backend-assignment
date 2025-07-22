@@ -3,7 +3,7 @@ import axios, { AxiosError } from 'axios'
 import {addDays, endOfToday, getTime} from 'date-fns'
 import TransactionTC, { getTransactionsPerBlock, Transaction } from "./Transaction";
 import { GraphQLError } from "graphql";
-import { truncateSync } from "fs";
+import { totalTransactionsListEnergy } from "./EnergyUtils";
 
 interface DayBlockAPIResponse {
     height: number,
@@ -34,7 +34,7 @@ async function getDayConsumption(day: Date){
     const millis = getTime(day)
 
     let dayEnergy = 0
-    let transactions : Array<Transaction> = []
+    let dayTransactions : Array<Transaction> = []
 
     try {
         const url = `https://blockchain.info/blocks/${millis}?format=json`
@@ -45,27 +45,21 @@ async function getDayConsumption(day: Date){
 
         const pendingBlocks = blocks.map(block => getTransactionsPerBlock(block.hash))
 
-        /*let pendingBlocks:Promise<Transaction[]>[] = []
-        for (let i=0; i<3; i++){
-            pendingBlocks = [...pendingBlocks, getTransactionsPerBlock(blocks[i].hash)]
-        }*/
+        const transactionsPerBlocks = await Promise.all(pendingBlocks)
 
-        const transactionsPerBlock = await Promise.all(pendingBlocks)
-
-        for(let tblock of transactionsPerBlock){
+        // there are a list of blocks per day, every block contains a list of transactions
+        for(let transactions of transactionsPerBlocks){
             // sum up the energy consumed by every transaction in a block
-            dayEnergy += tblock.reduce<number>((prevEnergy, t)=>{
-                return prevEnergy + t.energy
-            },0)
+            dayEnergy += totalTransactionsListEnergy(transactions)
             
             // include the transactions of this block in the day transactions
-            transactions = [...transactions, ...tblock]
+            dayTransactions = [...dayTransactions, ...transactions]
         }
 
         return {
             date: day,
             energy: dayEnergy,
-            transactions
+            transactions: dayTransactions
         }
                 
     }
@@ -83,7 +77,10 @@ DayEnergyTC.addResolver({
     name: 'getEnergyLastDays',
     type:  [DayEnergyTC],
     args: {
-        days: 'Int'
+        days: {
+            type: 'Int',
+            defaultValue: 1
+        }
     },
     resolve: async({_, args} : ResolverResolveParams<unknown,unknown,ResolverArgs>)=>{
 
