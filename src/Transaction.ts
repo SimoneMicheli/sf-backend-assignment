@@ -8,7 +8,12 @@ interface Transaction {
     energy: number
 }
 
-type TransactionAPI = Omit<Transaction,'energy'>
+type TransactionAPIRespnse = Omit<Transaction,'energy'>
+
+interface BlockAPIResponse {
+    hash: string,
+    tx: Array<TransactionAPIRespnse>
+}
 
 const TransactionTC = schemaComposer.createObjectTC({
     name: 'Transaction',
@@ -18,6 +23,23 @@ const TransactionTC = schemaComposer.createObjectTC({
     },
 })
 
+async function getTransactionsPerBlock(blockId:string) : Promise<Transaction[]> {
+    const url = `https://blockchain.info/rawblock/${blockId}`
+    try{
+        const {data} = await axios.get<BlockAPIResponse>(url)
+
+        const transactions : Transaction[] = data.tx.map(
+            (t) => ({hash: t.hash, energy: t.size * 4.56, size: t.size})
+        )
+
+        return transactions
+    }catch (error){
+
+        const err = error as AxiosError
+        throw new GraphQLError(err.message)
+    }
+}
+
 TransactionTC.addResolver({
     name: 'findByBlockId',
     args: {blockId: 'String!'},
@@ -26,24 +48,10 @@ TransactionTC.addResolver({
         
         const {blockId} = args
 
-        const url = `https://blockchain.info/rawblock/${blockId}`
-        try{
-            const {data} = await axios.get(url)
-
-            const transactions : Transaction[] = data.tx.map(
-                (t:TransactionAPI) => ({hash: t.hash, energy: t.size * 4.56})
-            )
-
-            return transactions
-        }catch (error){
-
-            const err = error as AxiosError
-            throw new GraphQLError(err.message)
-        }
-
-
+        return getTransactionsPerBlock(blockId)
         
     }
 })
 
 export default TransactionTC
+export {getTransactionsPerBlock, Transaction}
