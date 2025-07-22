@@ -1,8 +1,8 @@
 import { ResolverResolveParams, schemaComposer } from 'graphql-compose'
 import { GraphQLError } from 'graphql'
 import axios, { AxiosError } from 'axios'
-import { Wallet } from './WalletEnergy'
 import { calcTransactionEnergy } from './EnergyUtils'
+import redis from './cache'
 
 interface Transaction {
     hash: string,
@@ -25,19 +25,40 @@ const TransactionTC = schemaComposer.createObjectTC({
     },
 })
 
+const getBlockKey = (blockId:string)=>(`blk:${blockId}`)
+
 async function getTransactionsPerBlock(blockId:string) : Promise<Transaction[]> {
-    const url = `https://blockchain.info/rawblock/${blockId}`
+
+
+    //try to load block transactions from cache
     try{
+        const tjson = await redis.get(getBlockKey(blockId))
+        if (tjson){
+            const transactions = JSON.parse(tjson) 
+            return transactions
+        }
+
+    }catch (error) {
+        console.info(`Cache miss for block id: ${blockId}`)
+    }
+
+    //if not found in the cache load from API
+    try{
+        const url = `https://blockchain.info/rawblock/${blockId}`
         const {data} = await axios.get<BlockAPIResponse>(url)
 
-        const transactions : Transaction[] = data.tx.map(calcTransactionEnergy)
+        const transactions = data.tx.map(calcTransactionEnergy)
+
+        redis.set(getBlockKey(blockId),JSON.stringify(transactions),"EX",300)
 
         return transactions
+        
     }catch (error){
-
         const err = error as AxiosError
-        throw new GraphQLError(err.message)
+        console.error(error, `Unable to fetch block id: ${blockId}`)
+        throw new GraphQLError(`Unable to fetch block id: ${blockId}`)
     }
+
 }
 
 TransactionTC.addResolver({

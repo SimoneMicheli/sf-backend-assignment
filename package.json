@@ -18,10 +18,13 @@
     "graphql-helix": "^1.13.0",
     "graphql-request": "^5.0.0",
     "graphql-scalars": "^1.18.0",
-    "lambda-api": "^0.11.2"
+    "ioredis": "^5.6.1",
+    "lambda-api": "^0.11.2",
+    "node-redis": "^0.1.7"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.80",
+    "@types/ioredis": "^5.0.0",
     "@types/node": "14.x",
     "@types/serverless": "^3",
     "aws-sdk": "^2.952.0",

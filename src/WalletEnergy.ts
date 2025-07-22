@@ -2,6 +2,7 @@ import { ResolverResolveParams, schemaComposer } from "graphql-compose";
 import TransactionTC, { Transaction, TransactionAPIRespnse } from "./Transaction";
 import axios from "axios";
 import { calcTransactionEnergy, totalTransactionsListEnergy } from "./EnergyUtils";
+import { GraphQLError } from "graphql";
 
 interface Wallet{
     address: string,
@@ -54,7 +55,11 @@ WalletTC.addResolver({
                 transactions: transactions
             }
 
-        }catch(error){}
+        }catch(error){
+
+            console.log(error, `Unable to process wallet ${address} info`)
+            throw new GraphQLError(`Unable to process wallet ${address} info`)
+        }
     }
 })
 
