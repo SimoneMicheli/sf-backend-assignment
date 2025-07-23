@@ -1,4 +1,4 @@
-import { TransactionAPIRespnse } from "./transaction";
+import { TransactionAPIRespnse } from "./transactionType";
 
 export interface BlockAPIResponse {
     hash: string,

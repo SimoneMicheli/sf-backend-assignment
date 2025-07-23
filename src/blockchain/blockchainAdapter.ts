@@ -3,7 +3,9 @@ import { BlockAPIResponse } from "../types/blockType"
 import { Transaction } from "../types/transactionType"
 import { GraphQLError } from "graphql"
 import redis from "../cache"
-import { calcTransactionEnergy } from "../utils/energyUtils"
+import { calcTransactionEnergy, totalTransactionsListEnergy } from "../utils/energyUtils"
+import {getTime} from 'date-fns'
+import { DayBlockAPIResponse } from "../types/dayType"
 
 
 async function fetchBlock(blockId: string){
@@ -14,6 +16,14 @@ async function fetchBlock(blockId: string){
 
         return transactions
     }
+
+async function fetchDayBlocks(day: Date){
+    const millis = getTime(day)
+    const url = `https://blockchain.info/blocks/${millis}?format=json`
+
+    const response = await axios.get<DayBlockAPIResponse[]>(url)
+    return response.data
+}
 
 const getBlockKey = (blockId:string)=>(`blk:${blockId}`)
 
@@ -43,6 +53,44 @@ const blockchainAdapter = {
             throw new GraphQLError(`Unable to fetch block id: ${blockId}`)
         }
 
+    },
+
+    getDayConsumption: async (day: Date) => {
+        let dayEnergy = 0
+        let dayTransactions : Array<Transaction> = []
+
+        try {
+            
+            const blocks = await fetchDayBlocks(day)
+
+            const pendingBlocks = blocks.map(block => blockchainAdapter.getTransactionsPerBlock(block.hash))
+
+            const transactionsPerBlocks = await Promise.all(pendingBlocks)
+
+            // there are a list of blocks per day, every block contains a list of transactions
+            for(let transactions of transactionsPerBlocks){
+                // sum up the energy consumed by every transaction in a block
+                dayEnergy += totalTransactionsListEnergy(transactions)
+                
+                // include the transactions of this block in the day transactions
+                dayTransactions = [...dayTransactions, ...transactions]
+            }
+
+            return {
+                date: day,
+                energy: dayEnergy,
+                transactions: dayTransactions
+            }
+                    
+        }
+        catch{
+
+            return {
+                date: day,
+                energy: null,
+                transactions: null
+            }
+        }
     }
 }
 

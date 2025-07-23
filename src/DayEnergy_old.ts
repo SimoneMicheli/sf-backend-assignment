@@ -7,30 +7,11 @@ import { Transaction } from "./types/transactionType";
 import TransactionTC from "./graphql/transactionSchema";
 import blockchainAdapter from "./blockchain/blockchainAdapter";
 
-interface DayBlockAPIResponse {
-    height: number,
-    hash: string,
-    time: number
-}
 
-interface DayEnergy {
-    date: Date,
-    energy: number | null,
-    transactions: Transaction[] | null
-}
 
-const DayEnergyTC = schemaComposer.createObjectTC({
-    name: 'dayEnergy',
-    fields: {
-        date: 'Date!',
-        energy: 'Float',
-        transactions: [TransactionTC]
-    }
-})
 
-interface ResolverArgs {
-    days: number
-}
+
+
 
 async function getDayConsumption(day: Date){
     const millis = getTime(day)
