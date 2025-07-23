@@ -1,21 +1,10 @@
 import { ResolverResolveParams, schemaComposer } from 'graphql-compose'
 import { GraphQLError } from 'graphql'
 import axios, { AxiosError } from 'axios'
-import { calcTransactionEnergy } from './EnergyUtils'
+import { calcTransactionEnergy } from './utils/energyUtils'
 import redis from './cache'
-
-interface Transaction {
-    hash: string,
-    size: number,
-    energy: number
-}
-
-type TransactionAPIRespnse = Omit<Transaction,'energy'>
-
-interface BlockAPIResponse {
-    hash: string,
-    tx: Array<TransactionAPIRespnse>
-}
+import { Transaction } from './types/transactionType'
+import { BlockAPIResponse } from './types/blockType'
 
 const TransactionTC = schemaComposer.createObjectTC({
     name: 'Transaction',

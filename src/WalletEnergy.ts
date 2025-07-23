@@ -1,8 +1,9 @@
 import { ResolverResolveParams, schemaComposer } from "graphql-compose";
-import TransactionTC, { Transaction, TransactionAPIRespnse } from "./Transaction";
 import axios from "axios";
-import { calcTransactionEnergy, totalTransactionsListEnergy } from "./EnergyUtils";
+import { calcTransactionEnergy, totalTransactionsListEnergy } from "./utils/energyUtils";
 import { GraphQLError } from "graphql";
+import { Transaction, TransactionAPIRespnse } from "./types/transactionType";
+import TransactionTC from "./graphql/transactionSchema";
 
 interface Wallet{
     address: string,

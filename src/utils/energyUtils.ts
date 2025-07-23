@@ -1,4 +1,4 @@
-import { Transaction, TransactionAPIRespnse } from "./Transaction"
+import { Transaction, TransactionAPIRespnse } from "../Transaction"
 
 //given a transaction API response, return its energy
 function calcTransactionEnergy(t: TransactionAPIRespnse) : Transaction{

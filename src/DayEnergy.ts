@@ -1,9 +1,11 @@
 import { ResolverResolveParams, schemaComposer } from "graphql-compose";
 import axios, { AxiosError } from 'axios'
 import {addDays, endOfToday, getTime} from 'date-fns'
-import TransactionTC, { getTransactionsPerBlock, Transaction } from "./Transaction";
 import { GraphQLError } from "graphql";
-import { totalTransactionsListEnergy } from "./EnergyUtils";
+import { totalTransactionsListEnergy } from "./utils/energyUtils";
+import { Transaction } from "./types/transactionType";
+import TransactionTC from "./graphql/transactionSchema";
+import blockchainAdapter from "./blockchain/blockchainAdapter";
 
 interface DayBlockAPIResponse {
     height: number,
@@ -43,7 +45,7 @@ async function getDayConsumption(day: Date){
         const blocks = response.data
 
 
-        const pendingBlocks = blocks.map(block => getTransactionsPerBlock(block.hash))
+        const pendingBlocks = blocks.map(block => blockchainAdapter.getTransactionsPerBlock(block.hash))
 
         const transactionsPerBlocks = await Promise.all(pendingBlocks)
 

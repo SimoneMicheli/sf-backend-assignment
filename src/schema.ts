@@ -1,5 +1,5 @@
 import { SchemaComposer } from 'graphql-compose'
-import TransactionTC from './Transaction'
+import TransactionTC from './graphql/transactionSchema'
 import DayEnergyTC from './DayEnergy'
 import WalletTC from './WalletEnergy'
 
