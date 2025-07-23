@@ -9,22 +9,23 @@ import {addDays, endOfToday} from 'date-fns'
 const getTransactionsPerBlocks = async (blockIds: Array<string>) => {
 
     //check if the block exists in the cache
-    const blocks = await Promise.all(blockIds.map(async (blockId, i)=>{
-        const blockTransactions = await loadTransactionsBlockFromCache(blockId)
-        if (blockTransactions){
+    const cacheBlocks = await Promise.all(blockIds.map(b => loadTransactionsBlockFromCache(b)))
+
+    const blocks = cacheBlocks.map((transactions, i)=>{
+        if (transactions){
             return {
-                blockId: blockId,
+                blockId: blockIds[i],
                 index: i,
-                transactions: blockTransactions
+                transactions: transactions
             }
         }else{
             return {
-                blockId: blockId,
+                blockId: blockIds[i],
                 index: i,
                 transactions: null
             }
         }
-    }))
+    })
 
     const blocksToFetch = blocks.filter(b=>b.transactions == null)
 
@@ -80,8 +81,9 @@ const energyProcessor = {
             }
                     
         }
-        catch{
+        catch (error){
 
+            console.error(error)
             return {
                 date: day,
                 energy: null,
