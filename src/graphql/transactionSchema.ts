@@ -1,5 +1,5 @@
 import { ResolverResolveParams, schemaComposer } from 'graphql-compose'
-import blockchainAdapter from '../blockchain/blockchainAdapter'
+import energyProcessor from '../energy/energy'
 
 const TransactionTC = schemaComposer.createObjectTC({
     name: 'Transaction',
@@ -17,7 +17,7 @@ TransactionTC.addResolver({
         
         const {blockId} = args
 
-        return blockchainAdapter.getTransactionsPerBlock(blockId)
+        return energyProcessor.getTransactionsPerBlock(blockId)
         
     }
 })

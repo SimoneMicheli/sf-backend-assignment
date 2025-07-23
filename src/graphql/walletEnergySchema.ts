@@ -1,10 +1,8 @@
 import { ResolverResolveParams, schemaComposer } from "graphql-compose";
 import TransactionTC from "./transactionSchema";
-import axios from "axios";
-import { WalletAPIResponse } from "../types/walletType";
-import { calcTransactionEnergy, totalTransactionsListEnergy } from "../utils/energyUtils";
+import { totalTransactionsListEnergy } from "../energy/energyUtils";
 import { GraphQLError } from "graphql";
-import blockchainAdapter from "../blockchain/blockchainAdapter";
+import energyProcessor from "../energy/energy";
 
 const WalletTC = schemaComposer.createObjectTC({
     name: "wallet",
@@ -26,7 +24,7 @@ WalletTC.addResolver({
 
         try{
 
-            const transactions = await blockchainAdapter.getTransactionsPerWallet(address)
+            const transactions = await energyProcessor.getTransactionsPerWallet(address)
 
             return {
                 address: address,
@@ -36,7 +34,7 @@ WalletTC.addResolver({
 
         }catch(error){
 
-            console.log(error, `Unable to process wallet ${address} info`)
+            console.error(error, `Unable to process wallet ${address} info`)
             throw new GraphQLError(`Unable to process wallet ${address} info`)
         }
     }

@@ -1,4 +1,4 @@
-import { Transaction, TransactionAPIRespnse } from "../Transaction"
+import { Transaction, TransactionAPIRespnse } from '../types/transactionType'
 
 //given a transaction API response, return its energy
 function calcTransactionEnergy(t: TransactionAPIRespnse) : Transaction{
@@ -6,7 +6,9 @@ function calcTransactionEnergy(t: TransactionAPIRespnse) : Transaction{
 }
 
 //given a list of transactions, return the total energy
-function totalTransactionsListEnergy(transactions: Transaction[]){
+function totalTransactionsListEnergy(transactions: Transaction[]|null){
+    if (transactions == null)
+        return 0
     return transactions.reduce<number>((prevEnergy, t)=>{
         return prevEnergy + t.energy
     },0)

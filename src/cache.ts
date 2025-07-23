@@ -1,4 +1,5 @@
 import {Redis} from 'ioredis'
+import { Transaction } from './types/transactionType'
 
 // Create a Redis instance.
 // By default, it will connect to localhost:6379
@@ -9,7 +10,28 @@ redis.on("connect",()=>{
 })
 
 redis.on("error",(error)=>{
-    console.log(error)
+    console.error(error)
 })
+
+const getBlockKey = (blockId:string)=>(`blk:${blockId}`)
+
+export async function loadTransactionsBlockFromCache(blockId: string): Promise<Transaction[]|null> {
+    try{
+        const tjson = await redis.get(getBlockKey(blockId))
+        if (tjson){
+            const transactions = JSON.parse(tjson) 
+            return transactions
+        }
+        return null
+
+    }catch (error) {
+        console.info(`Cache miss for block id: ${blockId}`)
+        return null
+    }
+}
+
+export async function saveTransactionsBlockToCache(blockId: string, transactions: Transaction[]){
+    redis.set(getBlockKey(blockId),JSON.stringify(transactions),"EX",300)
+}
 
 export default redis
