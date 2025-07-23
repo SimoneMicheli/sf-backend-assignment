@@ -1,7 +1,7 @@
 import { SchemaComposer } from 'graphql-compose'
 import TransactionTC from './graphql/transactionSchema'
 import DayEnergyTC from './graphql/dayEnergySchema'
-import WalletTC from './WalletEnergy'
+import WalletTC from './graphql/walletEnergySchema'
 
 const schemaComposer = new SchemaComposer()
 

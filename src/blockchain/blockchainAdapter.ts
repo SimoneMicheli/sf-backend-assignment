@@ -6,6 +6,7 @@ import redis from "../cache"
 import { calcTransactionEnergy, totalTransactionsListEnergy } from "../utils/energyUtils"
 import {getTime} from 'date-fns'
 import { DayBlockAPIResponse } from "../types/dayType"
+import { WalletAPIResponse } from "../types/walletType"
 
 
 async function fetchBlock(blockId: string){
@@ -23,6 +24,12 @@ async function fetchDayBlocks(day: Date){
 
     const response = await axios.get<DayBlockAPIResponse[]>(url)
     return response.data
+}
+
+function fetchWallet(address: string){
+    const url = `https://blockchain.info/rawaddr/${address}`
+
+    return axios.get<WalletAPIResponse>(url)
 }
 
 const getBlockKey = (blockId:string)=>(`blk:${blockId}`)
@@ -44,7 +51,7 @@ const blockchainAdapter = {
 
         //if not found in the cache load from API
         try{
-            const transactions = fetchBlock(blockId)
+            const transactions = await fetchBlock(blockId)
             redis.set(getBlockKey(blockId),JSON.stringify(transactions),"EX",300)
             return transactions
         }catch (error){
@@ -91,6 +98,12 @@ const blockchainAdapter = {
                 transactions: null
             }
         }
+    },
+
+    getTransactionsPerWallet: async (address: string)=>{
+        
+        const response = await fetchWallet(address)
+        return response.data.txs.map(calcTransactionEnergy)
     }
 }
 

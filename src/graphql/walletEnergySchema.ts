@@ -1,20 +1,10 @@
 import { ResolverResolveParams, schemaComposer } from "graphql-compose";
+import TransactionTC from "./transactionSchema";
 import axios from "axios";
-import { calcTransactionEnergy, totalTransactionsListEnergy } from "./utils/energyUtils";
+import { WalletAPIResponse } from "../types/walletType";
+import { calcTransactionEnergy, totalTransactionsListEnergy } from "../utils/energyUtils";
 import { GraphQLError } from "graphql";
-import { Transaction, TransactionAPIRespnse } from "./types/transactionType";
-import TransactionTC from "./graphql/transactionSchema";
-
-interface Wallet{
-    address: string,
-    energy: number,
-    transactions: Transaction[]
-}
-
-interface WalletAPIResponse {
-    address: string,
-    txs: TransactionAPIRespnse[]
-}
+import blockchainAdapter from "../blockchain/blockchainAdapter";
 
 const WalletTC = schemaComposer.createObjectTC({
     name: "wallet",
@@ -24,15 +14,6 @@ const WalletTC = schemaComposer.createObjectTC({
         transactions: [TransactionTC]
     }
 })
-
-/*WalletTC.addFields({
-    transactions: {
-        type: [TransactionTC],
-        resolve: (source) =>{
-                return source.transactions.map(calTransactionEnergy)
-            }
-        }
-})*/
 
 WalletTC.addResolver({
     name: 'findByAddress',
@@ -44,14 +25,11 @@ WalletTC.addResolver({
         const {address} = args
 
         try{
-            const url = `https://blockchain.info/rawaddr/${address}`
 
-            const response = await axios.get<WalletAPIResponse>(url)
-
-            const transactions = response.data.txs.map(calcTransactionEnergy)
+            const transactions = await blockchainAdapter.getTransactionsPerWallet(address)
 
             return {
-                address: response.data.address,
+                address: address,
                 energy: totalTransactionsListEnergy(transactions),
                 transactions: transactions
             }
@@ -65,4 +43,3 @@ WalletTC.addResolver({
 })
 
 export default WalletTC
-export {Wallet}
