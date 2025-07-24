@@ -9,5 +9,6 @@ export interface DayBlockAPIResponse {
 export interface DayEnergy {
     date: Date,
     energy: number | null,
-    transactions: Transaction[] | null
+    transactions: Transaction[] | null,
+    errors: null | Array<any>
 }

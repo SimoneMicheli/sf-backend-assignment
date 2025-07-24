@@ -15,30 +15,13 @@ redis.on("error",(error)=>{
 
 const getBlockKey = (blockId:string)=>(`blk:${blockId}`)
 
-/*export async function loadTransactionsBlockFromCache(blockId: string): Promise<Transaction[]|null> {
-    try{
-        const tjson = await redis.get(getBlockKey(blockId))
-        if (tjson){
-            const transactions = JSON.parse(tjson) 
-            return transactions
-        }
-        return null
-
-    }catch (error) {
-        console.info(`Cache miss for block id: ${blockId}`)
-        return null
-    }
-}*/
-
 export function loadTransactionsBlockFromCache(blockId: string): Promise<Transaction[]|null> {
     return redis.get(getBlockKey(blockId)).then(tjson=>{
-            if (tjson)
-                return JSON.parse(tjson)
-            else
-                return null
-        })
-        
-
+        if (tjson)
+            return JSON.parse(tjson)
+        else
+            return null
+    })
 }
 
 export async function saveTransactionsBlockToCache(blockId: string, transactions: Transaction[]){

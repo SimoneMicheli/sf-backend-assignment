@@ -13,10 +13,7 @@ const blockchainAPI = {
     },
 
     getTransactionsFromDataBlock: (dataBlock: AxiosResponse<BlockAPIResponse>) =>{
-        if(dataBlock.status<400)
-            return dataBlock.data.tx.map(calcTransactionEnergy)
-        else    
-            return null
+        return dataBlock.data.tx.map(calcTransactionEnergy)
     },
 
     fetchDayBlocks: async(day: Date) => {

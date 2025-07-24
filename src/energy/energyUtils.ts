@@ -1,8 +1,9 @@
+import { BYTE_TO_KWH } from '../constants'
 import { Transaction, TransactionAPIRespnse } from '../types/transactionType'
 
 //given a transaction API response, return its energy
 function calcTransactionEnergy(t: TransactionAPIRespnse) : Transaction{
-    return {hash: t.hash, energy: t.size * 4.56, size: t.size}
+    return {hash: t.hash, energy: t.size * BYTE_TO_KWH, size: t.size}
 }
 
 //given a list of transactions, return the total energy
