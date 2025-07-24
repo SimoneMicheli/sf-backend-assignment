@@ -34,8 +34,8 @@ WalletTC.addResolver({
 
         }catch(error){
 
-            console.error(error, `Unable to process wallet ${address} info`)
-            throw new GraphQLError(`Unable to process wallet ${address} info`)
+            console.error(error, `Unable to process wallet ${address}`)
+            throw new GraphQLError(`Unable to process wallet ${address}`)
         }
     }
 })
